@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkShield - Security Warning</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            text-align: center;
+            background: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);
+            border-radius: 20px;
+            padding: 50px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            max-width: 600px;
+            width: 90%;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .shield-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 25px;
+            background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(255, 68, 68, 0.4);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 10px 30px rgba(255, 68, 68, 0.4);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 15px 40px rgba(255, 68, 68, 0.6);
+            }
+        }
+
+        .shield-icon svg {
+            width: 60px;
+            height: 60px;
+            fill: white;
+        }
+
+        .logo {
+            width: 80px;
+            height: auto;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #ff4444;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(255, 68, 68, 0.3);
+        }
+
+        .warning-subtitle {
+            font-size: 18px;
+            color: #ff6666;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .url-container {
+            background: rgba(255, 68, 68, 0.1);
+            border: 2px solid #ff4444;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 25px 0;
+            word-break: break-all;
+        }
+
+        .url-label {
+            font-size: 12px;
+            color: #ff6666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .url-text {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+
+        .warning-details {
+            background: rgba(255, 152, 0, 0.1);
+            border-left: 4px solid #ff9800;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            text-align: left;
+        }
+
+        .warning-details h3 {
+            font-size: 16px;
+            color: #ffb74d;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .warning-details ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .warning-details li {
+            font-size: 14px;
+            color: #e0e0e0;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .warning-details li:before {
+            content: "⚠";
+            position: absolute;
+            left: 0;
+            color: #ff9800;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-width: 180px;
+        }
+
+        .btn-safe {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-safe:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-danger {
+            background: transparent;
+            border: 2px solid #ff4444;
+            color: #ff4444;
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 68, 68, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-report {
+            background: transparent;
+            border: 2px solid #888;
+            color: #888;
+            font-size: 14px;
+            padding: 10px 20px;
+            min-width: auto;
+        }
+
+        .btn-report:hover {
+            border-color: #aaa;
+            color: #aaa;
+        }
+
+        .countdown {
+            font-size: 13px;
+            color: #888;
+            margin-top: 20px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+        }
+
+        .footer-text {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .footer-text a {
+            color: #7289da;
+            text-decoration: none;
+        }
+
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* Checkbox for whitelist option */
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            gap: 10px;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-container label {
+            font-size: 14px;
+            color: #aaa;
+            cursor: pointer;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="shield-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm-1 14H9v-2h2v2zm0-4H9V7h2v5z"/>
+            </svg>
+        </div>
+
+        <img class="logo" src="images/lsa128.png" alt="LinkShield Logo">
+        
+        <h1>⚠️ Dangerous Site Detected</h1>
+        <p class="warning-subtitle">LinkShield has identified this site as potentially malicious</p>
+
+        <div class="url-container">
+            <div class="url-label">Blocked URL:</div>
+            <div class="url-text" id="blockedUrl">Loading...</div>
+        </div>
+
+        <div class="warning-details">
+            <h3>Why was this blocked?</h3>
+            <ul>
+                <li>This site may contain phishing attempts to steal your credentials</li>
+                <li>Malware or ransomware may be present</li>
+                <li>The site may be impersonating a legitimate service</li>
+                <li>Suspicious or fraudulent activity has been detected</li>
+            </ul>
+        </div>
+
+        <div class="checkbox-container">
+            <input type="checkbox" id="whitelistCheck">
+            <label for="whitelistCheck">I trust this site. Don't warn me again for this URL.</label>
+        </div>
+
+        <div class="button-container">
+            <button class="btn-safe" id="goBackBtn">
+                <span>← Go Back to Safety</span>
+            </button>
+            <button class="btn-danger" id="continueBtn">
+                <span>Continue Anyway (Not Recommended)</span>
+            </button>
+        </div>
+
+        <div class="button-container">
+            <button class="btn-report" id="reportBtn">Report False Positive</button>
+        </div>
+
+        <div class="countdown" id="countdown"></div>
+
+        <div class="footer">
+            <p class="footer-text">
+                Protected by <strong>LinkShield</strong><br>
+                Learn more about online security at 
+                <a href="https://linkshieldai.com" target="_blank">linkshieldai.com</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="warning.js"></script>
+</body>
+</html>
