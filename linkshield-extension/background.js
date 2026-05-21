@@ -63,13 +63,13 @@ const CONFIG = {
 
 /**
  * In-memory cache for scan results
- * Structure: Map<url, { result: 'safe'|'malicious'|'nsfw', timestamp: number }>
+ * Structure: Map<origin, { result: 'safe'|'malicious'|'nsfw', timestamp: number }>
  */
 const scanCache = new Map();
 
 /**
  * Failed scan tracker - prevents infinite retry loops
- * Structure: Map<url, { attempts: number, lastAttempt: timestamp, errors: string[] }>
+ * Structure: Map<origin, { attempts: number, lastAttempt: timestamp, errors: string[] }>
  */
 const failedScans = new Map();
 
@@ -86,6 +86,24 @@ const rateLimitTracker = {
  * Structure: Set<url>
  */
 const temporaryAllowList = new Set();
+
+/**
+ * Convert a page URL into the site-level URL we scan and cache.
+ * Example: https://chess.com/game/123 -> https://chess.com/
+ */
+function getScanTargetUrl(url) {
+    try {
+        const urlObj = new URL(url);
+        if (!['http:', 'https:'].includes(urlObj.protocol)) {
+            return null;
+        }
+
+        return urlObj.origin + '/';
+    } catch (error) {
+        console.error("LinkShield: Could not normalize URL for scanning:", url, error.message);
+        return null;
+    }
+}
 
 // ============================================================================
 // INITIALIZATION & LIFECYCLE
@@ -124,10 +142,11 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
     if (details.frameId !== 0) return;
     
     const url = details.url;
+    const scanTargetUrl = getScanTargetUrl(url);
     const warningPageUrl = chrome.runtime.getURL("warning.html");
     
     // Skip non-HTTP URLs and our own warning page
-    if (!url.startsWith('http') || url.startsWith(warningPageUrl)) {
+    if (!scanTargetUrl || url.startsWith(warningPageUrl)) {
         return;
     }
     
@@ -144,7 +163,7 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
         return;
     }
     
-    console.log("LinkShield: Evaluating URL:", url);
+    console.log("LinkShield: Evaluating URL:", url, "Scan target:", scanTargetUrl);
     
     // Check whitelist
     const isTrusted = await isTrustedSite(url);
@@ -155,7 +174,7 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
     }
     
     // Check cache
-    const cached = getCachedResult(url);
+    const cached = getCachedResult(scanTargetUrl);
     if (cached) {
         console.log(`LinkShield: Cache hit - ${cached.result}`);
         handleCachedResult(cached.result, url, details.tabId);
@@ -163,7 +182,7 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
     }
     
     // Check if URL has exceeded failure threshold
-    if (shouldSkipDueToFailures(url)) {
+    if (shouldSkipDueToFailures(scanTargetUrl)) {
         console.log("LinkShield: URL in cooldown period after repeated failures");
         updateBadge('error', details.tabId);
         return;
@@ -698,8 +717,11 @@ function isRateLimited() {
  */
 async function isTrustedSite(url) {
     return new Promise((resolve) => {
-        chrome.storage.local.get([url], (data) => {
-            resolve(data[url] === true);
+        const scanTargetUrl = getScanTargetUrl(url);
+        const keys = scanTargetUrl && scanTargetUrl !== url ? [url, scanTargetUrl] : [url];
+
+        chrome.storage.local.get(keys, (data) => {
+            resolve(keys.some(key => data[key] === true));
         });
     });
 }
@@ -1170,9 +1192,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // Perform scan (called from warning page)
     if (request.action === 'scanUrl') {
         const { url } = request;
+        const scanTargetUrl = getScanTargetUrl(url);
         
         (async () => {
             try {
+                if (!scanTargetUrl) {
+                    sendResponse({ result: 'error', error: 'Invalid URL' });
+                    return;
+                }
+
+                const cached = getCachedResult(scanTargetUrl);
+                if (cached) {
+                    sendResponse({
+                        result: cached.result,
+                        details: { cached: true, scannedUrl: scanTargetUrl }
+                    });
+                    return;
+                }
+
                 // Validate API key exists
                 const apiKey = await getApiKey();
                 if (!apiKey) {
@@ -1187,11 +1224,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 }
                 
                 // Perform parallel scans
-                const scanResult = await scanUrlParallel(url, apiKey);
+                const scanResult = await scanUrlParallel(scanTargetUrl, apiKey);
                 
                 // Cache successful results
                 if (scanResult.result !== 'error') {
-                    cacheResult(url, scanResult.result);
+                    cacheResult(scanTargetUrl, scanResult.result);
                 }
                 
                 // Log blocked sites

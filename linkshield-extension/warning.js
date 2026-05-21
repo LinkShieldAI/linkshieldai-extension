@@ -9,6 +9,19 @@
 // INITIALIZATION
 // ============================================================================
 
+function getScanTargetUrl(url) {
+    try {
+        const urlObj = new URL(url);
+        if (!['http:', 'https:'].includes(urlObj.protocol)) {
+            return null;
+        }
+
+        return urlObj.origin + '/';
+    } catch {
+        return null;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log("LinkShield Warning: Initializing...");
     
@@ -689,9 +702,10 @@ function handleContinue() {
 
     // Handle Permanent Whitelist
     if (whitelistCheck?.checked) {
-        chrome.storage.local.set({ [targetUrl]: true }, () => {
+        const trustedSite = getScanTargetUrl(targetUrl) || targetUrl;
+        chrome.storage.local.set({ [trustedSite]: true }, () => {
             console.log("Site whitelisted successfully");
-            logWhitelistEvent(targetUrl);
+            logWhitelistEvent(trustedSite);
         });
     }
 
